@@ -1,5 +1,6 @@
 -- Create user_profiles table for BearFitPH
 -- This stores additional user data beyond Supabase's built-in auth.users
+-- Supports Member, Staff, Leads, and Admin roles
 
 CREATE TABLE IF NOT EXISTS public.user_profiles (
   -- Primary key linked to auth.users
@@ -9,26 +10,38 @@ CREATE TABLE IF NOT EXISTS public.user_profiles (
   email TEXT NOT NULL,
   full_name TEXT NOT NULL,
   profile_image_url TEXT,
+  role VARCHAR(20) NOT NULL CHECK (role IN ('Member', 'Staff', 'Leads', 'Admin')) DEFAULT 'Member',
+  status TEXT DEFAULT 'Active',
+  branch TEXT DEFAULT 'Malingap Branch',
   
-  -- Membership details
+  -- ============ MEMBER-SPECIFIC FIELDS ============
   membership_package TEXT DEFAULT 'Full 48 Package+',
   membership_id TEXT UNIQUE,
-  branch TEXT DEFAULT 'Malingap Branch',
-  status TEXT DEFAULT 'Active',
-  role TEXT DEFAULT 'Member',
-  
-  -- Fitness stats
   workout_streak INTEGER DEFAULT 0,
   bearforce_points INTEGER DEFAULT 0,
   prestige_member_season TEXT,
-  fitness_level TEXT DEFAULT 'A+',
-  
-  -- Session tracking
+  fitness_level TEXT DEFAULT 'Beginner',
   sessions_completed INTEGER DEFAULT 0,
   sessions_total INTEGER DEFAULT 48,
-  
-  -- Badges and achievements
   badges TEXT[] DEFAULT ARRAY[]::TEXT[],
+  
+  -- ============ STAFF-SPECIFIC FIELDS ============
+  position TEXT,
+  clients_assigned INTEGER DEFAULT 0,
+  total_sessions_conducted INTEGER DEFAULT 0,
+  staff_rating DECIMAL(3,2) DEFAULT 5.0,
+  certifications TEXT[] DEFAULT ARRAY[]::TEXT[],
+  
+  -- ============ LEADS-SPECIFIC FIELDS ============
+  lead_source TEXT,
+  status_type TEXT DEFAULT 'New',
+  follow_up_date TIMESTAMP WITH TIME ZONE,
+  interest_level VARCHAR(20),
+  assigned_staff UUID,
+  
+  -- ============ ADMIN-SPECIFIC FIELDS ============
+  permissions TEXT[] DEFAULT ARRAY[]::TEXT[],
+  admin_level VARCHAR(20) DEFAULT 'Manager',
   
   -- Timestamps
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

@@ -25,6 +25,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [selectedRole, setSelectedRole] = useState<'Member' | 'Staff' | 'Leads' | 'Admin'>('Member');
   const { signUp, signIn } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,8 +39,8 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
           setLoading(false);
           return;
         }
-        await signUp(email, password, fullName);
-        toast.success('Account created! Welcome to BearFitPH');
+        await signUp(email, password, fullName, selectedRole);
+        toast.success(`Account created! Welcome to BearFitPH as ${selectedRole}`);
       } else {
         await signIn(email, password);
         toast.success('Signed in successfully');
@@ -51,6 +52,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
       setEmail('');
       setPassword('');
       setFullName('');
+      setSelectedRole('Member');
       setIsSignUp(false);
       
       // Redirect to dashboard
@@ -79,21 +81,44 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-6">
           {isSignUp && (
-            <div className="space-y-2">
-              <Label htmlFor="fullName" className="text-gray-300 text-sm font-medium">
-                Full Name
-              </Label>
-              <Input
-                id="fullName"
-                type="text"
-                placeholder="Enter your full name"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required={isSignUp}
-                disabled={loading}
-                className="bg-[#1a1a1a] border border-[#333333] text-white placeholder:text-gray-500 focus:border-[#F37120] focus:ring-[#F37120] rounded-lg"
-              />
-            </div>
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="fullName" className="text-gray-300 text-sm font-medium">
+                  Full Name
+                </Label>
+                <Input
+                  id="fullName"
+                  type="text"
+                  placeholder="Enter your full name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required={isSignUp}
+                  disabled={loading}
+                  className="bg-[#1a1a1a] border border-[#333333] text-white placeholder:text-gray-500 focus:border-[#F37120] focus:ring-[#F37120] rounded-lg"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-gray-300 text-sm font-medium">Account Type</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {(['Member', 'Staff', 'Leads', 'Admin'] as const).map((role) => (
+                    <button
+                      key={role}
+                      type="button"
+                      onClick={() => setSelectedRole(role)}
+                      disabled={loading}
+                      className={`py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                        selectedRole === role
+                          ? 'bg-[#F37120] text-white'
+                          : 'bg-[#1a1a1a] border border-[#333333] text-gray-300 hover:border-[#F37120]'
+                      }`}
+                    >
+                      {role}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
           )}
 
           <div className="space-y-2">

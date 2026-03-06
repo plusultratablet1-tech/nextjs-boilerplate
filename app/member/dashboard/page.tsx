@@ -1,7 +1,8 @@
 "use client"
 
 import Image from "next/image"
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
+import { useAuth } from "@/lib/auth/AuthContext"
 import { Header, DesktopHeader } from "@/components/bearfit/header"
 import { ProfileCard } from "@/components/bearfit/profile-card"
 import { SessionCard } from "@/components/bearfit/session-card"
@@ -482,11 +483,22 @@ const sessionTimeSlots = {
 }
 
 export default function BearfitApp() {
+  const { userProfile, user } = useAuth();
   const [activeTab, setActiveTab] = useState("home")
   const [showChat, setShowChat] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const [chatInput, setChatInput] = useState("")
-  const [activeRole, setActiveRole] = useState<"Member" | "Staff" | "Leads" | "Admin">("Member")
+  // Use user's role from Supabase profile, fall back to Member if not available
+  const [activeRole, setActiveRole] = useState<"Member" | "Staff" | "Leads" | "Admin">(
+    userProfile?.role || (localStorage.getItem("bearfit_preview_role") as any) || "Member"
+  )
+
+  // Update role when userProfile loads
+  React.useEffect(() => {
+    if (userProfile?.role) {
+      setActiveRole(userProfile.role);
+    }
+  }, [userProfile?.role]);
 
   // Help modal (loads content from Supabase)
   const [helpOpen, setHelpOpen] = useState(false)

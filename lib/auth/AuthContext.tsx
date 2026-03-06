@@ -8,6 +8,7 @@ interface UserProfile {
   id: string;
   email: string;
   full_name: string;
+  role: 'Member' | 'Staff' | 'Leads' | 'Admin';
   membership_package: string;
   membership_id: string;
   branch: string;
@@ -20,7 +21,6 @@ interface UserProfile {
   sessions_completed: number;
   sessions_total: number;
   badges: string[];
-  role: string;
   created_at: string;
   updated_at: string;
 }
@@ -29,7 +29,7 @@ interface AuthContextType {
   user: User | null;
   userProfile: UserProfile | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string) => Promise<void>;
+  signUp: (email: string, password: string, fullName: string, role: 'Member' | 'Staff' | 'Leads' | 'Admin') => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -98,7 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signUp = async (email: string, password: string, fullName: string, role: 'Member' | 'Staff' | 'Leads' | 'Admin' = 'Member') => {
     try {
       // Sign up user
       const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -107,6 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         options: {
           data: {
             full_name: fullName,
+            role: role,
           },
         },
       });
@@ -114,21 +115,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (authError) throw authError;
       if (!authData.user) throw new Error('Sign up failed');
 
-      // Create user profile
+      // Create user profile with role
+      const profileData: any = {
+        id: authData.user.id,
+        email,
+        full_name: fullName,
+        role: role,
+        status: 'Active',
+      };
+
+      // Set role-specific defaults
+      if (role === 'Member') {
+        profileData.membership_package = 'Full 48 Package+';
+        profileData.membership_id = `M${Date.now()}`;
+        profileData.branch = 'Malingap Branch';
+        profileData.workout_streak = 0;
+        profileData.bearforce_points = 0;
+        profileData.prestige_member_season = 'Season 1';
+        profileData.fitness_level = 'Beginner';
+        profileData.sessions_completed = 0;
+        profileData.sessions_total = 48;
+        profileData.badges = [];
+      } else if (role === 'Staff') {
+        profileData.branch = 'Malingap Branch';
+        profileData.position = 'Coach';
+        profileData.clients_assigned = 0;
+        profileData.total_sessions_conducted = 0;
+      } else if (role === 'Leads') {
+        profileData.lead_source = 'Walk-in';
+        profileData.status_type = 'New';
+        profileData.follow_up_date = null;
+      } else if (role === 'Admin') {
+        profileData.branch = 'Main';
+        profileData.permissions = [];
+      }
+
       const { error: profileError } = await supabase
         .from('user_profiles')
-        .insert([
-          {
-            id: authData.user.id,
-            email,
-            full_name: fullName,
-            membership_package: 'Full 48 Package+',
-            membership_id: `M${Date.now()}`,
-            branch: 'Malingap Branch',
-            status: 'Active',
-            role: 'Member',
-          },
-        ]);
+        .insert([profileData]);
 
       // Log but don't throw - user_profiles table may not exist yet
       if (profileError) {
