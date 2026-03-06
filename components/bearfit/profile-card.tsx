@@ -13,6 +13,7 @@ import {
   Target,
   Flame,
 } from "lucide-react"
+import { useAuth } from "@/lib/auth/AuthContext"
 
 // Info explanations for each stat
 const statInfos = {
@@ -66,10 +67,24 @@ function BadgePill({
 }
 
 export function ProfileCard() {
+  const { userProfile } = useAuth()
   const scrollRef = useRef<HTMLDivElement>(null)
   const [activeIndex, setActiveIndex] = useState(0)
   const [showInfo, setShowInfo] = useState<keyof typeof statInfos | null>(null)
   const totalCards = 4
+
+  // Use real user data if available
+  const displayName = userProfile?.full_name?.split(' ')[0] || 'User'
+  const membershipPackage = userProfile?.membership_package || 'Full 48 Package+'
+  const membershipId = userProfile?.membership_id || 'M00-1'
+  const branch = userProfile?.branch || 'Malingap Branch'
+  const workoutStreak = userProfile?.workout_streak || 0
+  const bearforcePoints = userProfile?.bearforce_points || 0
+  const prestigeSeason = userProfile?.prestige_member_season || 'Season 2'
+  const fitnessLevel = userProfile?.fitness_level || 'A+'
+  const sessionsCompleted = userProfile?.sessions_completed || 40
+  const sessionsTotal = userProfile?.sessions_total || 48
+  const sessionPercentage = Math.round((sessionsCompleted / sessionsTotal) * 100)
 
   useEffect(() => {
     const scrollEl = scrollRef.current
@@ -94,7 +109,7 @@ export function ProfileCard() {
           <User className="w-5 h-5 text-muted-foreground" />
           <span className="text-base">
             <span className="text-muted-foreground">Welcome,</span>{" "}
-            <span className="font-semibold text-foreground">Alex</span>
+            <span className="font-semibold text-foreground">{displayName}</span>
           </span>
         </div>
       </div>
@@ -125,18 +140,18 @@ export function ProfileCard() {
 
           {/* Package Info */}
           <div className="flex-1 flex flex-col justify-center min-w-0">
-            <span className="text-sm font-medium text-foreground">Full 48 Package+</span>
+            <span className="text-sm font-medium text-foreground">{membershipPackage}</span>
             <div className="flex items-center gap-1.5 mt-0.5">
               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-xs text-green-500 font-medium">Active Member</span>
+              <span className="text-xs text-green-500 font-medium">{userProfile?.status === 'Active' ? 'Active Member' : 'Inactive'}</span>
             </div>
 
             <div className="w-full bg-secondary rounded-full h-1.5 mt-2">
-              <div className="bg-gradient-to-r from-green-500 to-yellow-500 h-1.5 rounded-full" style={{ width: "83%" }} />
+              <div className="bg-gradient-to-r from-green-500 to-yellow-500 h-1.5 rounded-full" style={{ width: `${sessionPercentage}%` }} />
             </div>
 
             <div className="flex flex-col items-center mt-2">
-              <span className="text-xs text-foreground font-medium">40 of 48 sessions</span>
+              <span className="text-xs text-foreground font-medium">{sessionsCompleted} of {sessionsTotal} sessions</span>
               <button className="text-xs text-primary font-medium touch-active mt-1">View Profile</button>
             </div>
           </div>
@@ -155,8 +170,8 @@ export function ProfileCard() {
                 <span className="text-[10px] text-green-500 font-medium uppercase tracking-wider">Membership ID</span>
               </div>
 
-              <span className="text-2xl font-bold text-foreground mt-1 tracking-tight">M00-1</span>
-              <span className="text-sm text-muted-foreground font-medium">Malingap Branch</span>
+              <span className="text-2xl font-bold text-foreground mt-1 tracking-tight">{membershipId}</span>
+              <span className="text-sm text-muted-foreground font-medium">{branch}</span>
 
               {/* Badges — updated icons + text color to match your Image 2 */}
               <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
@@ -207,17 +222,17 @@ export function ProfileCard() {
             {/* Workout Streak */}
             <div className="shrink-0 w-24 bg-[#252525] border border-border/60 rounded-xl p-2 text-center touch-active snap-start relative">
               <span className="text-[9px] text-muted-foreground block leading-tight">Workout Streak</span>
-              <span className="text-2xl font-bold text-foreground leading-tight">17</span>
+              <span className="text-2xl font-bold text-foreground leading-tight">{workoutStreak}</span>
               <span className="text-[10px] text-foreground block">Days</span>
               <span className="inline-block mt-1 px-2 py-0.5 bg-primary text-primary-foreground text-[8px] font-medium rounded-full">
-                Personal Best
+                {workoutStreak > 10 ? 'Personal Best' : 'Keep Going!'}
               </span>
             </div>
 
             {/* Bearforce Points */}
             <div className="shrink-0 w-24 bg-[#252525] border border-border/60 rounded-xl p-2 text-center touch-active snap-start relative">
               <span className="text-[9px] text-muted-foreground block leading-tight">Bearforce Points</span>
-              <span className="text-2xl font-bold text-foreground leading-tight">1540</span>
+              <span className="text-2xl font-bold text-foreground leading-tight">{bearforcePoints}</span>
               <span className="text-[10px] text-foreground block">MP</span>
               <span className="text-[8px] text-green-500 block mt-1">+120 this month</span>
             </div>
@@ -226,7 +241,7 @@ export function ProfileCard() {
             <div className="shrink-0 w-24 bg-gradient-to-b from-[#8b0000] to-[#5c0000] border border-red-900/60 rounded-xl p-2 text-center touch-active snap-start relative">
               <span className="text-[9px] text-red-200 block leading-tight">Prestige Member</span>
               <span className="text-[10px] font-bold text-white block">Season</span>
-              <span className="text-2xl font-bold text-white block leading-tight">2</span>
+              <span className="text-2xl font-bold text-white block leading-tight">{prestigeSeason?.split(' ')[1] || '2'}</span>
               <span className="text-[8px] text-red-200 block mt-1">Since 2023</span>
             </div>
 
@@ -234,7 +249,7 @@ export function ProfileCard() {
             <div className="shrink-0 w-24 bg-gradient-to-b from-[#0d4f3c] to-[#052e23] border border-emerald-900/60 rounded-xl p-2 text-center touch-active snap-start relative">
               <span className="text-[9px] text-emerald-200 block leading-tight">Fitness Level</span>
               <span className="text-[10px] font-bold text-white block">Tier</span>
-              <span className="text-2xl font-bold text-white block leading-tight">A+</span>
+              <span className="text-2xl font-bold text-white block leading-tight">{fitnessLevel}</span>
               <span className="text-[8px] text-emerald-200 block mt-1">Top 5%</span>
             </div>
           </div>

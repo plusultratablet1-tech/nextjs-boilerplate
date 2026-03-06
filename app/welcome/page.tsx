@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { AuthModal } from "@/components/auth/AuthModal";
+import { useAuth } from "@/lib/auth/AuthContext";
 
 type Slide = {
   key: string;
@@ -27,6 +29,9 @@ const DURATIONS_SECONDS = {
 const IDLE_RESTART_SECONDS = 60;
 
 export default function WelcomePage() {
+  const { user } = useAuth();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+
   const slides: Slide[] = useMemo(
     () => [
       {
@@ -307,9 +312,13 @@ export default function WelcomePage() {
       type="button"
       onClick={() => {
         resetIdle();
-        window.location.href = "/member/dashboard";
+        if (user) {
+          window.location.href = "/member/dashboard";
+        } else {
+          setAuthModalOpen(true);
+        }
       }}
-      className="mt-4 w-full sm:w-[420px] rounded-full bg-[#F37120] px-6 py-3 font-semibold text-black"
+      className="mt-4 w-full sm:w-[420px] rounded-full bg-[#F37120] px-6 py-3 font-semibold text-black hover:bg-[#e06010] transition-colors"
     >
       Get Started – Free Assessment
     </button>
@@ -501,6 +510,9 @@ export default function WelcomePage() {
           transform: translateY(0);
         }
       `}</style>
+
+      {/* Auth Modal */}
+      <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
     </div>
   );
 }
