@@ -52,6 +52,11 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
       setPassword('');
       setFullName('');
       setIsSignUp(false);
+      
+      // Redirect to dashboard
+      setTimeout(() => {
+        window.location.href = '/member/dashboard';
+      }, 1000);
     } catch (error: any) {
       console.error('[v0] Auth error:', error);
       toast.error(error.message || 'Authentication failed. Please try again.');

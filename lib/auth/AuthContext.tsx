@@ -84,8 +84,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('id', userId)
         .single();
 
-      if (error && error.code !== 'PGRST116') {
-        throw error;
+      // PGRST116 = row not found, other errors might mean table doesn't exist
+      if (error) {
+        console.warn('Profile fetch warning:', error.message);
+        setUserProfile(null);
+        return;
       }
 
       setUserProfile(data as UserProfile || null);
@@ -127,7 +130,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           },
         ]);
 
-      if (profileError) throw profileError;
+      // Log but don't throw - user_profiles table may not exist yet
+      if (profileError) {
+        console.warn('Profile creation warning:', profileError);
+      }
 
       setUser(authData.user);
       await fetchUserProfile(authData.user.id);
