@@ -363,11 +363,13 @@ export default function WelcomePage() {
         <button
           onClick={() => {
             resetIdle();
-            skip();
+            prev();
           }}
-          className="text-white/80"
+          disabled={index === 0}
+          className={index === 0 ? "opacity-40" : "text-white/80"}
+          title="Go back to previous slide"
         >
-          Skip
+          Back
         </button>
 
         <div className="flex gap-2">
@@ -382,12 +384,19 @@ export default function WelcomePage() {
         <button
           onClick={() => {
             resetIdle();
-            next();
+            if (isLast) {
+              // On last slide, go to dashboard
+              if (user) {
+                window.location.href = '/member/dashboard';
+              }
+            } else {
+              next();
+            }
           }}
-          disabled={isLast}
-          className={isLast ? "opacity-40" : "text-white/80"}
+          className="text-white/80"
+          title={isLast ? "Go to dashboard" : "Go to next slide"}
         >
-          Next
+          {isLast ? 'Start' : 'Next'}
         </button>
       </div>
 
