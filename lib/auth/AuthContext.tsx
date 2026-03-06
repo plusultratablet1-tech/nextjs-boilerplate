@@ -40,39 +40,59 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const authInitializedRef = React.useRef(false);
 
   useEffect(() => {
-    // Check current session
-    const checkAuth = async () => {
+    let isMounted = true;
+
+    // Only check auth once on mount
+    const initializeAuth = async () => {
+      if (authInitializedRef.current) return;
+      authInitializedRef.current = true;
+
       try {
-        const { data } = await supabase.auth.getSession();
-        setUser(data.session?.user ?? null);
-        
-        if (data.session?.user) {
-          await fetchUserProfile(data.session.user.id);
-        }
+        // Use onAuthStateChange instead of getSession to avoid lock conflicts
+        const { data: authListener } = supabase.auth.onAuthStateChange(
+          async (event, session) => {
+            if (!isMounted) return;
+
+            if (session?.user) {
+              setUser(session.user);
+              // Only fetch profile for relevant events
+              if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
+                await fetchUserProfile(session.user.id);
+              }
+            } else {
+              setUser(null);
+              setUserProfile(null);
+            }
+
+            // Mark loading as complete after first event
+            if (isMounted) {
+              setLoading(false);
+            }
+          }
+        );
+
+        return authListener;
       } catch (error) {
-        console.error('Auth check error:', error);
-      } finally {
-        setLoading(false);
+        console.error('Auth initialization error:', error);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
-    checkAuth();
-
-    // Subscribe to auth changes
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        await fetchUserProfile(session.user.id);
-      } else {
-        setUserProfile(null);
-      }
-    });
+    const authListenerPromise = initializeAuth();
 
     return () => {
-      authListener?.subscription.unsubscribe();
+      isMounted = false;
+      // Cleanup listener
+      authListenerPromise.then((listener) => {
+        listener?.subscription?.unsubscribe();
+      }).catch(() => {
+        // Ignore cleanup errors
+      });
     };
   }, []);
 
@@ -86,14 +106,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // PGRST116 = row not found, other errors might mean table doesn't exist
       if (error) {
-        console.warn('Profile fetch warning:', error.message);
+        // Silently handle errors - user_profiles table may not exist yet
+        if (error.code !== 'PGRST116') {
+          console.warn('Profile fetch warning:', error.message);
+        }
         setUserProfile(null);
         return;
       }
 
       setUserProfile(data as UserProfile || null);
-    } catch (error) {
-      console.error('Error fetching user profile:', error);
+    } catch (error: any) {
+      // Ignore AbortError and other request errors
+      if (error?.name !== 'AbortError') {
+        console.error('Error fetching user profile:', error);
+      }
       setUserProfile(null);
     }
   };
@@ -155,12 +181,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .insert([profileData]);
 
       // Log but don't throw - user_profiles table may not exist yet
-      if (profileError) {
-        console.warn('Profile creation warning:', profileError);
+      if (profileError && profileError.code !== 'PGRST116') {
+        console.warn('Profile creation warning:', profileError.message);
       }
 
+      // Don't await profile fetch - let the auth listener handle it
       setUser(authData.user);
-      await fetchUserProfile(authData.user.id);
     } catch (error) {
       console.error('Sign up error:', error);
       throw error;
@@ -177,8 +203,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) throw error;
       if (!data.user) throw new Error('Sign in failed');
 
+      // Let the auth listener handle profile fetching
       setUser(data.user);
-      await fetchUserProfile(data.user.id);
     } catch (error) {
       console.error('Sign in error:', error);
       throw error;
