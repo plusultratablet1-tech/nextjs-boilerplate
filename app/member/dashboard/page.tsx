@@ -484,6 +484,22 @@ const sessionTimeSlots = {
 
 export default function BearfitApp() {
   const { userProfile, user } = useAuth();
+  
+  // Redirect non-Member roles to their respective dashboards
+  React.useEffect(() => {
+    if (user && userProfile?.role && userProfile.role !== "Member") {
+      const roleDashboardMap: Record<string, string> = {
+        "Staff": "/staff/dashboard",
+        "Leads": "/leads/dashboard",
+        "Admin": "/admin/dashboard",
+      };
+      const dashboardPath = roleDashboardMap[userProfile.role];
+      if (dashboardPath) {
+        window.location.href = dashboardPath;
+      }
+    }
+  }, [user, userProfile?.role]);
+
   const [activeTab, setActiveTab] = useState("home")
   const [showChat, setShowChat] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)

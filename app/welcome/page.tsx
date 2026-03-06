@@ -301,9 +301,9 @@ export default function WelcomePage() {
                     </div>
                   )}
 
-                  {/* CTA slide: Free Assessment Form */}
+                  {/* CTA slide: Free Assessment */}
                   {slide.cta && (
-                    <div className="mt-6 w-full max-w-md mx-auto">
+                    <div className="mt-6 flex flex-col items-center gap-4">
                       {/* FAQ trigger */}
                       <button
                         type="button"
@@ -311,44 +311,39 @@ export default function WelcomePage() {
                           resetIdle();
                           setFaqOpen(true);
                         }}
-                        className="text-sm underline text-white/80 whitespace-nowrap mb-6 block mx-auto"
+                        className="text-sm underline text-white/80 whitespace-nowrap"
                       >
-                        Questions? Get the facts here
+                        No guesswork, just gains. Get the facts here
                       </button>
 
-                      {/* Free Assessment Form */}
-                      <div className="bg-[#1a1a1a] border border-[#333333] rounded-xl p-6 space-y-4">
-                        <h3 className="text-lg font-semibold text-white">Start Your Free Assessment</h3>
-                        <input
-                          type="email"
-                          placeholder="Email address"
-                          className="w-full bg-[#0a0a0a] border border-[#333333] text-white placeholder:text-gray-500 focus:border-[#F37120] rounded-lg px-4 py-2.5"
-                          disabled={!user}
-                        />
-                        <input
-                          type="tel"
-                          placeholder="Phone number"
-                          className="w-full bg-[#0a0a0a] border border-[#333333] text-white placeholder:text-gray-500 focus:border-[#F37120] rounded-lg px-4 py-2.5"
-                          disabled={!user}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            resetIdle();
-                            if (!user) {
-                              setAuthModalOpen(true);
-                            } else {
-                              alert('Assessment submitted! Our team will contact you soon.');
-                            }
-                          }}
-                          className="w-full bg-[#F37120] hover:bg-[#e06a10] text-black font-semibold py-2.5 rounded-lg transition-colors"
-                        >
-                          {user ? 'Submit Assessment' : 'Sign Up to Continue'}
-                        </button>
-                        <p className="text-xs text-gray-400 text-center">
-                          {user ? 'Assessment data is secure' : 'Sign up to submit your free assessment'}
-                        </p>
-                      </div>
+                      {/* Main CTA button */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          resetIdle();
+                          if (!user) {
+                            setAuthModalOpen(true);
+                          } else {
+                            window.location.href = '/member/dashboard';
+                          }
+                        }}
+                        className="mt-2 w-full sm:w-[420px] rounded-full bg-[#F37120] px-6 py-3 font-semibold text-black hover:bg-[#e06a10] transition-colors"
+                      >
+                        Get Started – Free Assessment
+                      </button>
+
+                      {/* Dashboard sample button */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          resetIdle();
+                          localStorage.setItem("bearfit_preview_role", "Member");
+                          window.location.href = '/member/dashboard';
+                        }}
+                        className="mt-3 rounded-full bg-white/10 hover:bg-white/15 px-5 py-2 text-sm font-semibold text-white"
+                      >
+                        Dashboard Sample
+                      </button>
                     </div>
                   )}
                 </div>
