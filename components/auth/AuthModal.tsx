@@ -62,17 +62,20 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-gray-900 border-gray-700">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-md bg-[#0a0a0a] border-[#222222]">
+        <DialogHeader className="text-center">
           <DialogTitle className="text-2xl font-bold text-white">
-            {isSignUp ? 'Create Account' : 'Sign In'}
+            {isSignUp ? 'Create Account' : 'Welcome Back'}
           </DialogTitle>
+          <p className="text-sm text-gray-400 mt-1">
+            {isSignUp ? 'Join BearFitPH and start your fitness journey' : 'Sign in to your BearFitPH account'}
+          </p>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 mt-6">
           {isSignUp && (
             <div className="space-y-2">
-              <Label htmlFor="fullName" className="text-gray-200">
+              <Label htmlFor="fullName" className="text-gray-300 text-sm font-medium">
                 Full Name
               </Label>
               <Input
@@ -83,13 +86,13 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                 onChange={(e) => setFullName(e.target.value)}
                 required={isSignUp}
                 disabled={loading}
-                className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-orange-500"
+                className="bg-[#1a1a1a] border border-[#333333] text-white placeholder:text-gray-500 focus:border-[#F37120] focus:ring-[#F37120] rounded-lg"
               />
             </div>
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-gray-200">
+            <Label htmlFor="email" className="text-gray-300 text-sm font-medium">
               Email
             </Label>
             <Input
@@ -100,12 +103,12 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={loading}
-              className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-orange-500"
+              className="bg-[#1a1a1a] border border-[#333333] text-white placeholder:text-gray-500 focus:border-[#F37120] focus:ring-[#F37120] rounded-lg"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-gray-200">
+            <Label htmlFor="password" className="text-gray-300 text-sm font-medium">
               Password
             </Label>
             <Input
@@ -116,21 +119,21 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
               onChange={(e) => setPassword(e.target.value)}
               required
               disabled={loading}
-              className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-orange-500"
+              className="bg-[#1a1a1a] border border-[#333333] text-white placeholder:text-gray-500 focus:border-[#F37120] focus:ring-[#F37120] rounded-lg"
             />
           </div>
 
           <Button
             type="submit"
             disabled={loading}
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-full"
+            className="w-full bg-[#F37120] hover:bg-[#e06a10] text-white font-semibold py-2.5 rounded-lg mt-2 transition-colors disabled:opacity-50"
           >
             {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
             {isSignUp ? 'Create Account' : 'Sign In'}
           </Button>
         </form>
 
-        <div className="text-center text-sm text-gray-400">
+        <div className="text-center text-sm text-gray-400 mt-4">
           {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
           <button
             onClick={() => {
@@ -139,7 +142,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
               setPassword('');
               setFullName('');
             }}
-            className="text-orange-500 hover:text-orange-400 font-semibold"
+            className="text-[#F37120] hover:text-[#e06a10] font-semibold transition-colors"
           >
             {isSignUp ? 'Sign In' : 'Sign Up'}
           </button>

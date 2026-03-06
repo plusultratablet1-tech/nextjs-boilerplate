@@ -1,19 +1,21 @@
-# Supabase Setup Instructions
+# Supabase Setup Instructions for BearFitPH
 
-Follow these steps to set up your Supabase database for the BearFitPH app.
+This guide will help you set up your Supabase database to support user authentication and profile management.
 
-## Step 1: Go to Your Supabase Dashboard
+## Step 1: Access Your Supabase Dashboard
 
-Visit: https://app.supabase.com/projects and select your project (yctjcxtwbaaeigawfxkl)
+1. Visit: https://app.supabase.com
+2. Select your project **yctjcxtwbaaeigawfxkl**
 
 ## Step 2: Open SQL Editor
 
-1. Click on **SQL Editor** in the left sidebar
-2. Click **+ New Query**
+1. In the left sidebar, click **SQL Editor**
+2. Click the **+ New Query** button
+3. A new SQL editor window will open
 
-## Step 3: Run the Setup SQL
+## Step 3: Run the Database Setup SQL
 
-Copy and paste the following SQL into the editor and click **Run**:
+Copy the entire SQL block below and paste it into your SQL Editor:
 
 ```sql
 -- Create user_profiles table to store additional user data
@@ -74,23 +76,55 @@ CREATE TRIGGER update_user_profiles_updated_at BEFORE UPDATE ON user_profiles
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 ```
 
-## Step 4: Verify the Setup
+4. Click the **Run** button (or press Ctrl+Enter)
+5. You should see a green success message at the bottom
 
-After running the SQL:
+## Step 4: Verify the Table Was Created
+
 1. Go to **Table Editor** in the left sidebar
-2. You should see `user_profiles` table listed
-3. The table should have the columns shown in the SQL above
+2. You should see the new `user_profiles` table in the list
+3. Click on it to verify the columns match the SQL schema above
 
-## Step 5: Environment Variables
+## Step 5: Enable Email Authentication
 
-Make sure these environment variables are set in your project settings:
+1. Go to **Authentication** → **Providers** in the left sidebar
+2. Make sure **Email** is enabled (toggle should be on)
+3. Go to **Authentication** → **URL Configuration**
+4. Add these Redirect URLs:
+   - `http://localhost:3000/member/dashboard` (for development)
+   - `https://yourdomain.com/member/dashboard` (for production)
 
-- `NEXT_PUBLIC_SUPABASE_URL` = https://yctjcxtwbaaeigawfxkl.supabase.co
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` = Your Anon Key
-- `SUPABASE_SERVICE_KEY` = Your Service Role Key
+## Step 6: Verify Environment Variables
 
-These are already configured in your project.
+Your environment variables are already configured. You can verify them in your project settings:
 
-## Done!
+- ✅ `NEXT_PUBLIC_SUPABASE_URL` = https://yctjcxtwbaaeigawfxkl.supabase.co
+- ✅ `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Anon Key - already set)
+- ✅ `SUPABASE_SERVICE_KEY` (Service Role Key - already set)
 
-Your Supabase database is now ready. The app will automatically create user profiles when new users sign up.
+## Testing the Complete Flow
+
+1. **Welcome Page**: Click "Get Started" button
+2. **Sign Up**: Create a new account with:
+   - Email: test@example.com
+   - Password: SecurePassword123
+   - Full Name: Your Name
+3. **Dashboard**: You'll be automatically logged in and see your profile data
+4. **Log Out**: Click the logout button in the dashboard
+5. **Log In**: Sign back in with your credentials
+
+All your profile data is now stored securely in Supabase with Row Level Security enabled!
+
+## Troubleshooting
+
+**Error: "user_profiles table doesn't exist"**
+- Make sure you ran the SQL script in Step 3 successfully
+- Verify the table exists in Table Editor
+
+**Error: "CORS error or 401 Unauthorized"**
+- Check that your environment variables are correctly set
+- Verify your Supabase URL and keys in the SQL Editor's top-right
+
+**Profile data not showing**
+- Make sure you're logged in as an authenticated user
+- Check that the user_profiles table has a row with your user ID
